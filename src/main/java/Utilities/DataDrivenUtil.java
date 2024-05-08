@@ -70,10 +70,6 @@ public class DataDrivenUtil {
                         break;
                 }
             }
-
-            // Print request details for debugging
-            //System.out.println("baseUrl: " + baseUrl + "\nbasePath: " + basePath + "\npath" + pathParameter + "\n" + headerObject + "\nRequest: " + requestBody);
-
             try {
                 // Perform API request based on the method obtained
                 switch (method.toUpperCase()) {

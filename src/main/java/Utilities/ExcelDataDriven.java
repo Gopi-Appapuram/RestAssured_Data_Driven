@@ -10,11 +10,23 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Utility class for reading from and writing to Excel files.
+ */
 public class ExcelDataDriven {
 
+    /**
+     * Loads data from the specified Excel file and sheet into a list of hash maps.
+     *
+     * @param filename  The path to the Excel file.
+     * @param sheetName The name of the sheet from which data will be loaded.
+     * @return A list of hash maps containing the loaded data.
+     * @throws IOException If an I/O error occurs while reading the Excel file.
+     */
     public static List<HashMap<String, String>> loadDSheetData(String filename, String sheetName) throws IOException {
+        String filePath = "src/test/resources/TestData/" + filename + ".xlsx";
         List<Map<String, String>> data = new ArrayList<>();
-        FileInputStream fis = new FileInputStream(filename);
+        FileInputStream fis = new FileInputStream(filePath);
         Workbook workbook = WorkbookFactory.create(fis);
 
         Sheet sheet = workbook.getSheet(sheetName); // Assuming the data is in the first sheet
@@ -30,12 +42,12 @@ public class ExcelDataDriven {
         int numCols = headerRow.getLastCellNum();
         int numRows = sheet.getLastRowNum();
 
-//        for (int colIndex = 0; colIndex < numCols; colIndex++) {
-//            Cell headerCell = headerRow.getCell(colIndex, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
-//            String header = headerCell.getStringCellValue().trim();
-//            headers.put(String.valueOf(colIndex + 1), header);
-//        }
-//        System.out.println(headers);
+        /*for (int colIndex = 0; colIndex < numCols; colIndex++) {
+            Cell headerCell = headerRow.getCell(colIndex, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
+            String header = headerCell.getStringCellValue().trim();
+            headers.put(String.valueOf(colIndex + 1), header);
+        }
+        System.out.println(headers);*/
 
         List<HashMap<String, String>> excelData = new ArrayList<>();
 
@@ -90,41 +102,14 @@ public class ExcelDataDriven {
         return excelData;
     }
 
-
-    public static void validateDataDrivenTcs(List<HashMap<String, String>> ddtcs) {
-        //System.out.println(ddtcs);
-
-//        for (Map<String, String> testcase : ddtcs) {
-//            String baseUrl = testcase.get("BaseUrl");
-//            String endpoint = testcase.get("Endpoint");
-//            String pathParameter = testcase.get("Path Parameter");
-//            String header = testcase.get("Headers");
-//            String body = testcase.get("Request Body");
-//            String response = testcase.get("response");
-//            String statusCode = testcase.get("Status code");
-//
-//            // Printing values
-//            System.out.println("Base URL: " + baseUrl);
-//            System.out.println("Endpoint: " + endpoint);
-//            System.out.println("Path Parameter: " + pathParameter);
-//            System.out.println("Header: " + header);
-//            System.out.println("Body: " + body);
-//            System.out.println("Response: " + response);
-//            System.out.println("Status Code: " + statusCode);
-//
-//
-//            // Use these values to perform validation or execute requests
-//            // Example:
-//            executeRequest(baseUrl, endpoint, header, body);
-//        }
-    }
-
-/*    public static String executeRequest(String baseUrl, String endpoint, String header, String body) {
-
-        return "Response Data";
-    }*/
-
-
+    /**
+     * Writes response data to the specified Excel file and sheet.
+     *
+     * @param ddtcs          The list of maps containing response data.
+     * @param outputFilename The path to the output Excel file.
+     * @param sheetName      The name of the sheet where data will be written.
+     * @throws IOException If an I/O error occurs while writing to the Excel file.
+     */
     public static void writeResponseToOutputFile(List<Map<String, String>> ddtcs, String outputFilename, String sheetName) throws IOException {
         FileInputStream fis = new FileInputStream(outputFilename);
         Workbook workbook = WorkbookFactory.create(fis);
@@ -202,7 +187,7 @@ public class ExcelDataDriven {
         }
     }*/
 
-/*    private static int findColumnIndex(Sheet sheet, String headerName) {
+    /*private static int findColumnIndex(Sheet sheet, String headerName) {
         Row headerRow = sheet.getRow(0);
         if (headerRow != null) {
             for (int i = 0; i < headerRow.getLastCellNum(); i++) {
@@ -216,6 +201,14 @@ public class ExcelDataDriven {
     }*/
 
 
+    /**
+     * Writes data to the specified Excel file and sheet.
+     *
+     * @param outputFilename The path to the output Excel file.
+     * @param sheetName      The name of the sheet where data will be written.
+     * @param data           A hash map containing the data to be written.
+     * @throws IOException If an I/O error occurs while writing to the Excel file.
+     */
     public static void writeDataToExcel(String outputFilename, String sheetName, HashMap<String, String> data) throws IOException {
         try (Workbook workbook = WorkbookFactory.create(true);
              FileInputStream fis = new FileInputStream(outputFilename)) {
@@ -235,7 +228,7 @@ public class ExcelDataDriven {
             for (HashMap.Entry<String, String> entry : data.entrySet()) {
                 Row row = sheet.createRow(rowIndex++);
                 int lastCell = row.getLastCellNum();
-                for(int i = 0; i <= lastCell; i++){
+                for (int i = 0; i <= lastCell; i++) {
                     row.createCell(i).setCellValue(entry.getValue());
                 }
 
@@ -246,41 +239,6 @@ public class ExcelDataDriven {
                 workbook.write(fos);
             }
         }
-    }
-
-    /*public static void writeMapToExcel(String outputFilename, String sheetName, Map<String, String> data) throws IOException {
-        FileInputStream fis = new FileInputStream(outputFilename);
-        Workbook workbook = WorkbookFactory.create(fis);
-        Sheet sheet = workbook.getSheet(sheetName);
-
-        *//*int rowIndex = 0;
-        for (Map.Entry<String, String> entry : data.entrySet()) {
-            Row row = sheet.createRow(rowIndex++);
-            row.createCell(rowIndex).setCellValue(entry.getKey());
-            row.createCell(rowIndex++).setCellValue(entry.getValue());
-        }*//*
-
-
-        int rowIndex = sheet.getLastRowNum() + 1; // Start from the next row
-        for (Map.Entry<String, String> entry : data.entrySet()) {
-            Row row = sheet.createRow(rowIndex++);
-            int cellIndex = 0;
-            row.createCell(cellIndex++).setCellValue(entry.getKey());
-            row.createCell(cellIndex).setCellValue(entry.getValue());
-        }
-
-        try (FileOutputStream fos = new FileOutputStream(outputFilename)) {
-            workbook.write(fos);
-        } finally {
-            workbook.close();
-        }
-    }*/
-
-    public static void main(String[] args) throws IOException {
-        DataDrivenUtil dataDrivenUtil = new DataDrivenUtil();
-        // loadDSheetData("src/test/resources/TestData/RestAssured.xlsx", "Sheet2");
-        dataDrivenUtil.executeDataDrivenAPIs("src/test/resources/TestData/RestAssured.xlsx", "Sheet2");
-
     }
 
 

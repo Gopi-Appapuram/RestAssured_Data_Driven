@@ -1,11 +1,12 @@
 import Utilities.DataDrivenUtil;
+import org.testng.annotations.Test;
 
 import java.io.IOException;
 
 public class test {
-    public static void main(String[] args) throws IOException {
+    @Test
+    public static void execteDataDrivenAPIS() throws IOException {
         DataDrivenUtil dataDrivenUtil = new DataDrivenUtil();
-        // loadDSheetData("src/test/resources/TestData/RestAssured.xlsx", "Sheet2");
-        dataDrivenUtil.executeDataDrivenAPIs("src/test/resources/TestData/RestAssured.xlsx", "Sheet2");
+        dataDrivenUtil.executeDataDrivenAPIs("RestAssured", "Sheet2");
     }
 }

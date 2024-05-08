@@ -7,6 +7,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
+/**
+ * Utility class for working with JSON data.
+ */
 public class JsonUtils {
     private static ObjectMapper objectMapper = new ObjectMapper();
 
@@ -77,7 +80,13 @@ public class JsonUtils {
         return jsonObjectMap;
     }
 
-
+    /**
+     * Converts an input object to a JSON string.
+     *
+     * @param input The input object to convert.
+     * @return A JSON string representation of the input object.
+     * @throws IllegalArgumentException If the input is not a Map or List<Map<String, String>>.
+     */
     public static String convertToJsonString(Object input) {
         if (input instanceof Map) {
             return convertMapToJsonString((Map<String, String>) input);
@@ -88,6 +97,7 @@ public class JsonUtils {
         }
     }
 
+    // Private methods for internal use
 
     private static String convertListOfMapsToJsonString(List<Map<String, String>> listOfMaps) {
         StringBuilder jsonBuilder = new StringBuilder("{");
@@ -106,8 +116,7 @@ public class JsonUtils {
         return jsonBuilder.toString();
     }
 
-
-    public static String convertMapToJsonString(Map<String, String> jsonObjectMap) {
+    private static String convertMapToJsonString(Map<String, String> jsonObjectMap) {
         StringBuilder jsonBuilder = new StringBuilder("{");
 
         for (Map.Entry<String, String> entry : jsonObjectMap.entrySet()) {
@@ -125,7 +134,12 @@ public class JsonUtils {
         return jsonBuilder.toString();
     }
 
-
+    /**
+     * Generates a map with random values based on a provided JSON object string.
+     *
+     * @param jsonObjectString The JSON object string containing key-value pairs.
+     * @return A map with keys from the JSON object string and corresponding random values.
+     */
     public static Map<String, String> randomRequestJsonObject(String jsonObjectString) {
         Map<String, String> jsonObjectMap = new HashMap<>();
 
@@ -173,6 +187,8 @@ public class JsonUtils {
                         /*default:
                             System.out.println("Unsupported Key word " + value.replace("$Random", "").toUpperCase());*/
                     }
+                } else {
+                    responseValue = value;
                 }
 
                 jsonObjectMap.put(key, responseValue);
