@@ -19,7 +19,8 @@ public class JsonUtils {
      */
     public static Map<String, Object> getJsonDataAsMap(String jsonFileName) throws IOException {
         String completeJsonFilePath = System.getProperty("user.dir") + "/src/test/resources/" + jsonFileName;
-        Map<String, Object> data = objectMapper.readValue(new File(completeJsonFilePath), new TypeReference<>() {});
+        Map<String, Object> data = objectMapper.readValue(new File(completeJsonFilePath), new TypeReference<>() {
+        });
         return data;
     }
 
@@ -38,7 +39,8 @@ public class JsonUtils {
             String headersJson = data.get(CellName);
             // Parse JSON headers into a map
             ObjectMapper objectMapper = new ObjectMapper();
-            Map<String, String> headersMap = objectMapper.readValue(headersJson, new TypeReference<Map<String, String>>() {});
+            Map<String, String> headersMap = objectMapper.readValue(headersJson, new TypeReference<Map<String, String>>() {
+            });
             headersList.add(headersMap);
         }
         return headersList.iterator();
@@ -74,4 +76,109 @@ public class JsonUtils {
 
         return jsonObjectMap;
     }
+
+
+    public static String convertToJsonString(Object input) {
+        if (input instanceof Map) {
+            return convertMapToJsonString((Map<String, String>) input);
+        } else if (input instanceof List) {
+            return convertListOfMapsToJsonString((List<Map<String, String>>) input);
+        } else {
+            throw new IllegalArgumentException("Input must be a Map or List<Map<String, String>>");
+        }
+    }
+
+
+    private static String convertListOfMapsToJsonString(List<Map<String, String>> listOfMaps) {
+        StringBuilder jsonBuilder = new StringBuilder("{");
+
+        for (Map<String, String> map : listOfMaps) {
+            jsonBuilder.append(convertMapToJsonString(map)).append(",");
+        }
+
+        // Remove the trailing comma if there's at least one map
+        if (!listOfMaps.isEmpty()) {
+            jsonBuilder.deleteCharAt(jsonBuilder.length() - 1);
+        }
+
+        jsonBuilder.append("}");
+
+        return jsonBuilder.toString();
+    }
+
+
+    public static String convertMapToJsonString(Map<String, String> jsonObjectMap) {
+        StringBuilder jsonBuilder = new StringBuilder("{");
+
+        for (Map.Entry<String, String> entry : jsonObjectMap.entrySet()) {
+            // Append key and value with surrounding quotes
+            jsonBuilder.append("\"").append(entry.getKey()).append("\":\"").append(entry.getValue()).append("\",");
+        }
+
+        // Remove the trailing comma if there's at least one entry
+        if (!jsonObjectMap.isEmpty()) {
+            jsonBuilder.deleteCharAt(jsonBuilder.length() - 1);
+        }
+
+        jsonBuilder.append("}");
+
+        return jsonBuilder.toString();
+    }
+
+
+    public static Map<String, String> randomRequestJsonObject(String jsonObjectString) {
+        Map<String, String> jsonObjectMap = new HashMap<>();
+
+        // Remove leading and trailing braces from the JSON string
+        jsonObjectString = jsonObjectString.replace("{", "").replace("}", "");
+
+        // Split the JSON string by commas to separate key-value pairs
+        String[] keyValues = jsonObjectString.split(",");
+
+        // Iterate through each key-value pair
+        for (String keyValue : keyValues) {
+            // Split the pair by colon to get the key and value
+            String[] pair = keyValue.split(":");
+            if (pair.length == 2) {
+                // Trim and remove surrounding quotes from the key and value
+                String key = pair[0].trim().replaceAll("^\"|\"$", "");
+                String value = pair[1].trim().replaceAll("^\"|\"$", "");
+                String responseValue = "";
+                if (value.contains("$")) {
+                    switch (value.replace("$Random", "").toUpperCase()) {
+                        case "PASTDATE":
+                            responseValue = RandomDataGenerator.getRandomPastDate();
+                            break;
+                        case "FUTUREDATE":
+                            responseValue = RandomDataGenerator.getRandomFutureDate();
+                            break;
+                        case "FULLNAME":
+                            responseValue = RandomDataGenerator.getRandomDataFor(RandomDataTypeNames.FULLNAME);
+                            break;
+                        case "FIRSTNAME":
+                            responseValue = RandomDataGenerator.getRandomDataFor(RandomDataTypeNames.FIRSTNAME);
+                            break;
+                        case "LASTNAME":
+                            responseValue = RandomDataGenerator.getRandomDataFor(RandomDataTypeNames.LASTNAME);
+                            break;
+                        case "EMAIL":
+                            responseValue = RandomDataGenerator.getRandomDataFor(RandomDataTypeNames.EMAIL);
+                            break;
+                        case "BOOLEANVALUE":
+                            responseValue = String.valueOf(RandomDataGenerator.getRandomBooleanValue());
+                            break;
+                        case "COMPUTERIP":
+                            responseValue = RandomDataGenerator.getRandomDataFor(RandomDataTypeNames.IP_ADDRESS);
+                            break;
+                        /*default:
+                            System.out.println("Unsupported Key word " + value.replace("$Random", "").toUpperCase());*/
+                    }
+                }
+
+                jsonObjectMap.put(key, responseValue);
+            }
+        }
+        return jsonObjectMap;
+    }
+
 }

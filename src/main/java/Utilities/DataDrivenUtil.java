@@ -62,6 +62,8 @@ public class DataDrivenUtil {
                         break;
                     case "requestbody":
                         requestBody = eachRequest.get(keyName);
+                        Map<String, String> randomRequestValues = JsonUtils.randomRequestJsonObject(requestBody);
+                        requestBody = JsonUtils.convertToJsonString(randomRequestValues);
                         break;
                     case "statuscode":
                         statusCode = eachRequest.get(keyName);
