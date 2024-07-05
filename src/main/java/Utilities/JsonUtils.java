@@ -2,6 +2,7 @@ package Utilities;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,7 +12,7 @@ import java.util.*;
  * Utility class for working with JSON data.
  */
 public class JsonUtils {
-    private static ObjectMapper objectMapper = new ObjectMapper();
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
      * Reads JSON data from a file and returns it as a map.
@@ -22,28 +23,24 @@ public class JsonUtils {
      */
     public static Map<String, Object> getJsonDataAsMap(String jsonFileName) throws IOException {
         String completeJsonFilePath = System.getProperty("user.dir") + "/src/test/resources/" + jsonFileName;
-        Map<String, Object> data = objectMapper.readValue(new File(completeJsonFilePath), new TypeReference<>() {
-        });
-        return data;
+        return objectMapper.readValue(new File(completeJsonFilePath), new TypeReference<Map<String, Object>>() {});
     }
 
     /**
      * Parses JSON data from an Excel cell and returns it as an iterator of maps.
      *
-     * @param CellName The name of the Excel cell containing JSON data.
+     * @param cellName The name of the Excel cell containing JSON data.
      * @return An iterator of maps representing the parsed JSON data.
      * @throws IOException If an I/O error occurs while parsing the JSON data.
      */
-    public static Iterator<Map<String, String>> getJsonData(String CellName) throws IOException {
-        List<HashMap<String, String>> excelDataAsListOfMap = ExcelDataDriven.loadDSheetData("src/test/resources/TestData/RestAssured.xlsx", "Sheet2");
+    public static Iterator<Map<String, String>> getJsonData(String filename, String sheetName, String cellName) throws IOException, InvalidFormatException {
+        List<LinkedHashMap<String, String>> excelDataAsListOfMap = ExcelDataDriven.loadDSheetData("src/test/resources/TestData/" + filename + ".xlsx", sheetName);
         List<Map<String, String>> headersList = new ArrayList<>();
 
         for (Map<String, String> data : excelDataAsListOfMap) {
-            String headersJson = data.get(CellName);
+            String headersJson = data.get(cellName);
             // Parse JSON headers into a map
-            ObjectMapper objectMapper = new ObjectMapper();
-            Map<String, String> headersMap = objectMapper.readValue(headersJson, new TypeReference<Map<String, String>>() {
-            });
+            Map<String, String> headersMap = objectMapper.readValue(headersJson, new TypeReference<Map<String, String>>() {});
             headersList.add(headersMap);
         }
         return headersList.iterator();
@@ -97,10 +94,8 @@ public class JsonUtils {
         }
     }
 
-    // Private methods for internal use
-
     private static String convertListOfMapsToJsonString(List<Map<String, String>> listOfMaps) {
-        StringBuilder jsonBuilder = new StringBuilder("{");
+        StringBuilder jsonBuilder = new StringBuilder("[");
 
         for (Map<String, String> map : listOfMaps) {
             jsonBuilder.append(convertMapToJsonString(map)).append(",");
@@ -111,7 +106,7 @@ public class JsonUtils {
             jsonBuilder.deleteCharAt(jsonBuilder.length() - 1);
         }
 
-        jsonBuilder.append("}");
+        jsonBuilder.append("]");
 
         return jsonBuilder.toString();
     }
@@ -157,44 +152,38 @@ public class JsonUtils {
                 // Trim and remove surrounding quotes from the key and value
                 String key = pair[0].trim().replaceAll("^\"|\"$", "");
                 String value = pair[1].trim().replaceAll("^\"|\"$", "");
-                String responseValue = "";
-                if (value.contains("$")) {
-                    switch (value.replace("$Random", "").toUpperCase()) {
-                        case "PASTDATE":
-                            responseValue = RandomDataGenerator.getRandomPastDate();
-                            break;
-                        case "FUTUREDATE":
-                            responseValue = RandomDataGenerator.getRandomFutureDate();
-                            break;
-                        case "FULLNAME":
-                            responseValue = RandomDataGenerator.getRandomDataFor(RandomDataTypeNames.FULLNAME);
-                            break;
-                        case "FIRSTNAME":
-                            responseValue = RandomDataGenerator.getRandomDataFor(RandomDataTypeNames.FIRSTNAME);
-                            break;
-                        case "LASTNAME":
-                            responseValue = RandomDataGenerator.getRandomDataFor(RandomDataTypeNames.LASTNAME);
-                            break;
-                        case "EMAIL":
-                            responseValue = RandomDataGenerator.getRandomDataFor(RandomDataTypeNames.EMAIL);
-                            break;
-                        case "BOOLEANVALUE":
-                            responseValue = String.valueOf(RandomDataGenerator.getRandomBooleanValue());
-                            break;
-                        case "COMPUTERIP":
-                            responseValue = RandomDataGenerator.getRandomDataFor(RandomDataTypeNames.IP_ADDRESS);
-                            break;
-                        /*default:
-                            System.out.println("Unsupported Key word " + value.replace("$Random", "").toUpperCase());*/
-                    }
-                } else {
-                    responseValue = value;
-                }
-
+                String responseValue = getRandomValue(value);
                 jsonObjectMap.put(key, responseValue);
             }
         }
         return jsonObjectMap;
     }
 
+    private static String getRandomValue(String value) {
+        if (value.contains("$")) {
+            switch (value.replace("$Random", "").toUpperCase()) {
+                case "PASTDATE":
+                    return RandomDataGenerator.getRandomPastDate();
+                case "FUTUREDATE":
+                    return RandomDataGenerator.getRandomFutureDate();
+                case "FULLNAME":
+                    return RandomDataGenerator.getRandomDataFor(RandomDataTypeNames.FULLNAME);
+                case "FIRSTNAME":
+                    return RandomDataGenerator.getRandomDataFor(RandomDataTypeNames.FIRSTNAME);
+                case "LASTNAME":
+                    return RandomDataGenerator.getRandomDataFor(RandomDataTypeNames.LASTNAME);
+                case "EMAIL":
+                    return RandomDataGenerator.getRandomDataFor(RandomDataTypeNames.EMAIL);
+                case "BOOLEANVALUE":
+                    return String.valueOf(RandomDataGenerator.getRandomBooleanValue());
+                case "COMPUTERIP":
+                    return RandomDataGenerator.getRandomDataFor(RandomDataTypeNames.IP_ADDRESS);
+                default:
+                    System.out.println("Unsupported Key word " + value.replace("$Random", "").toUpperCase());
+                    return value;
+            }
+        } else {
+            return value;
+        }
+    }
 }

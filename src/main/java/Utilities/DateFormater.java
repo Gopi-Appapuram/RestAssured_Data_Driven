@@ -1,9 +1,14 @@
 package Utilities;
 
 import net.datafaker.Faker;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+import org.testng.annotations.Test;
 
+import javax.swing.*;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
@@ -45,11 +50,23 @@ public class DateFormater {
      *
      * @return A string representing the current date in the format "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'".
      */
-    public static String formatPresentDate() {
+
+    public static String formatPresentDateTime() {
         // Get the current date
-        LocalDate date = LocalDate.now();
+        Date date = new Date();
         // Format the date as a string in the desired format
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
         return formatter.format(date);
     }
+
+    public static String formatPresentDate() {
+        // Get the current date
+        Date date = new Date();
+        // Format the date as a string in the desired format
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        return formatter.format(date);
+    }
+
+
+
 }
