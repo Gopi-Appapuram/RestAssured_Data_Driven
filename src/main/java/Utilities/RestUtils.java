@@ -69,6 +69,27 @@ public class RestUtils {
     }
 
     /**
+     * Builds a request specification for a POST request with path and query parameters.
+     *
+     * @param baseUrl        the base URL of the API
+     * @param basePath       the base path of the API
+     * @param requestPayload the payload for the request
+     * @param pathParameters the path parameters for the request
+     * @param queryParameters the query parameters for the request
+     * @param headers        the headers for the request
+     * @return the request specification
+     */
+    private static RequestSpecification postRequestSpecificationWithPathAndQueryParams(String baseUrl, String basePath, Object requestPayload, Map<String, String> pathParameters, Map<String, String> queryParameters, Map<String, String> headers) {
+        return RestAssured.given().log().all()
+                .baseUri(baseUrl)
+                .basePath(basePath)
+                .pathParams(pathParameters)
+                .queryParams(queryParameters)
+                .headers(headers)
+                .body(requestPayload);
+    }
+
+    /**
      * Builds a request specification for a GET request.
      *
      * @param baseUrl  the base URL of the API
@@ -186,6 +207,27 @@ public class RestUtils {
         return RestAssured.given().log().all()
                 .baseUri(baseUrl)
                 .basePath(basePath)
+                .queryParams(queryParameters)
+                .headers(headers)
+                .body(requestPayload);
+    }
+
+    /**
+     * Builds a request specification for a PUT request with path and query parameters.
+     *
+     * @param baseUrl        the base URL of the API
+     * @param basePath       the base path of the API
+     * @param requestPayload the payload for the request
+     * @param pathParameters the path parameters for the request
+     * @param queryParameters the query parameters for the request
+     * @param headers        the headers for the request
+     * @return the request specification
+     */
+    private static RequestSpecification putRequestSpecificationWithPathAndQueryParams(String baseUrl, String basePath, Object requestPayload, Map<String, String> pathParameters, Map<String, String> queryParameters, Map<String, String> headers) {
+        return RestAssured.given().log().all()
+                .baseUri(baseUrl)
+                .basePath(basePath)
+                .pathParams(pathParameters)
                 .queryParams(queryParameters)
                 .headers(headers)
                 .body(requestPayload);
@@ -314,6 +356,27 @@ public class RestUtils {
                 .body(requestPayload);
     }
 
+    /**
+     * Builds a request specification for a PATCH request with path and query parameters.
+     *
+     * @param baseUrl        the base URL of the API
+     * @param basePath       the base path of the API
+     * @param requestPayload the payload for the request
+     * @param pathParameters the path parameters for the request
+     * @param queryParameters the query parameters for the request
+     * @param headers        the headers for the request
+     * @return the request specification
+     */
+    private static RequestSpecification patchRequestSpecificationWithPathAndQueryParams(String baseUrl, String basePath, Object requestPayload, Map<String, String> pathParameters, Map<String, String> queryParameters, Map<String, String> headers) {
+        return RestAssured.given().log().all()
+                .baseUri(baseUrl)
+                .basePath(basePath)
+                .pathParams(pathParameters)
+                .queryParams(queryParameters)
+                .headers(headers)
+                .body(requestPayload);
+    }
+
     /*-----------------------------METHODS PERFORMING REQUESTS--------------------------------*/
 
     /**
@@ -357,6 +420,22 @@ public class RestUtils {
      */
     public static Response performPostWithPathParams(String baseUrl, String basePath, Object requestPayload, Map<String, String> pathParameters, Map<String, String> headers) {
         RequestSpecification requestSpecification = postRequestSpecificationWithPathParams(baseUrl, basePath, requestPayload, pathParameters, headers);
+        return requestSpecification.post().then().log().all().extract().response();
+    }
+
+    /**
+     * Performs a POST request with path and query parameters.
+     *
+     * @param baseUrl        the base URL of the API
+     * @param basePath       the base path of the API
+     * @param requestPayload the payload for the request
+     * @param pathParameters the path parameters for the request
+     * @param queryParameters the query parameters for the request
+     * @param headers        the headers for the request
+     * @return the response of the request
+     */
+    public static Response performPostWithPathAndQueryParams(String baseUrl, String basePath, Object requestPayload, Map<String, String> pathParameters, Map<String, String> queryParameters, Map<String, String> headers) {
+        RequestSpecification requestSpecification = postRequestSpecificationWithPathAndQueryParams(baseUrl, basePath, requestPayload, pathParameters, queryParameters, headers);
         return requestSpecification.post().then().log().all().extract().response();
     }
 
@@ -461,6 +540,22 @@ public class RestUtils {
     }
 
     /**
+     * Performs a PUT request with path and query parameters.
+     *
+     * @param baseUrl        the base URL of the API
+     * @param basePath       the base path of the API
+     * @param requestPayload the payload for the request
+     * @param pathParameters the path parameters for the request
+     * @param queryParameters the query parameters for the request
+     * @param headers        the headers for the request
+     * @return the response of the request
+     */
+    public static Response performPutWithPathAndQueryParams(String baseUrl, String basePath, Object requestPayload, Map<String, String> pathParameters, Map<String, String> queryParameters, Map<String, String> headers) {
+        RequestSpecification requestSpecification = putRequestSpecificationWithPathAndQueryParams(baseUrl, basePath, requestPayload, pathParameters, queryParameters, headers);
+        return requestSpecification.put().then().log().all().extract().response();
+    }
+
+    /**
      * Performs a DELETE request.
      *
      * @param baseUrl  the base URL of the API
@@ -516,6 +611,7 @@ public class RestUtils {
         return requestSpecification.delete().then().log().all().extract().response();
     }
 
+
     /**
      * Performs a PATCH request.
      *
@@ -557,6 +653,22 @@ public class RestUtils {
      */
     public static Response performPatchWithQueryParams(String baseUrl, String basePath, Object requestPayload, Map<String, String> queryParameters, Map<String, String> headers) {
         RequestSpecification requestSpecification = patchRequestSpecificationWithQueryParams(baseUrl, basePath, requestPayload, queryParameters, headers);
+        return requestSpecification.patch().then().log().all().extract().response();
+    }
+
+    /**
+     * Performs a PATCH request with path and query parameters.
+     *
+     * @param baseUrl        the base URL of the API
+     * @param basePath       the base path of the API
+     * @param requestPayload the payload for the request
+     * @param pathParameters the path parameters for the request
+     * @param queryParameters the query parameters for the request
+     * @param headers        the headers for the request
+     * @return the response of the request
+     */
+    public static Response performPatchWithPathAndQueryParams(String baseUrl, String basePath, Object requestPayload, Map<String, String> pathParameters, Map<String, String> queryParameters, Map<String, String> headers) {
+        RequestSpecification requestSpecification = patchRequestSpecificationWithPathAndQueryParams(baseUrl, basePath, requestPayload, pathParameters, queryParameters, headers);
         return requestSpecification.patch().then().log().all().extract().response();
     }
 }
