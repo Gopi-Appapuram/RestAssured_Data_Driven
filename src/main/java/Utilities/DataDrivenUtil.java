@@ -11,7 +11,7 @@ public class DataDrivenUtil {
 
     private Response response;
     private final String projectPath = System.getProperty("user.dir");
-    private Properties envProps;
+    private Properties environmentProperties;
 
     /**
      * Loads environment data from the specified properties file.
@@ -20,8 +20,8 @@ public class DataDrivenUtil {
      */
     public void loadEnvironmentData(String environment) {
         try (FileReader reader = new FileReader(projectPath + "/src/test/resources/" + environment + ".properties")) {
-            envProps = new Properties();
-            envProps.load(reader);
+            environmentProperties = new Properties();
+            environmentProperties.load(reader);
         } catch (Exception ex) {
             System.err.println("Error occurred while reading environment file: " + ex.getMessage());
         }
@@ -38,16 +38,15 @@ public class DataDrivenUtil {
     public void executeDataDrivenAPIs(String fileName, String sheetName) throws IOException, InvalidFormatException {
         // Load data from data-driven sheet
         List<LinkedHashMap<String, String>> testData = ExcelDataDriven.loadDSheetData(fileName, sheetName);
+        List<LinkedHashMap<String, String>> updatedExcelDataList = new ArrayList<>();
 
         // Read all keys from the first row
-        Map<String, String> anyRow = testData.get(0);
-        Set<String> keys = anyRow.keySet();
+        Set<String> keys = testData.get(0).keySet();
 
-        String baseUrl = envProps.getProperty("baseUrl");
-
+        String baseUrl = environmentProperties.getProperty("baseUrl");
 
         // Loop and execute each request from data-driven sheet
-        for (Map<String, String> request : testData) {
+        for (LinkedHashMap<String, String> requestData : testData) {
             String basePath = "";
             Map<String, String> pathParams = null;
             Map<String, String> queryParams = null;
@@ -59,39 +58,42 @@ public class DataDrivenUtil {
             for (String key : keys) {
                 switch (key.toLowerCase()) {
                     case "baseurl":
-                        baseUrl = envProps.getProperty("baseUrl", baseUrl);
+                        baseUrl = environmentProperties.getProperty("baseUrl", baseUrl);
                         break;
                     case "basepath":
-                        basePath = request.get(key);
+                        basePath = requestData.get(key);
                         break;
                     case "pathparameters":
-                        pathParams = helperUtils.loadParameters(request.get(key));
+                        pathParams = helperUtils.loadParameters(requestData.get(key));
                         break;
                     case "queryparameters":
-                        queryParams = helperUtils.loadParameters(request.get(key));
+                        queryParams = helperUtils.loadParameters(requestData.get(key));
                         break;
                     case "headers":
-                        headers = JsonUtils.parseJsonObject(request.get(key));
+                        headers = JsonUtils.parseJsonObject(requestData.get(key));
                         break;
                     case "method":
-                        method = request.get(key);
+                        method = requestData.get(key);
                         break;
                     case "requestbody":
-                        requestBody = request.get(key);
+                        requestBody = requestData.get(key);
                         requestBody = JsonUtils.convertToJsonString(JsonUtils.randomRequestJsonObject(requestBody));
                         break;
                     case "statuscode":
-                        expectedStatusCode = request.get(key);
+                        expectedStatusCode = requestData.get(key);
                         break;
                 }
             }
 
-            //request.putAll(addBaseUrlToRequest(baseUrl, request));
-
-            executeAPIRequest(method, baseUrl, basePath, requestBody, pathParams, queryParams, headers, expectedStatusCode, request);
+            LinkedHashMap<String, String> updatedExcelData  = executeAPIRequest(method, baseUrl, basePath, requestBody, pathParams, queryParams, headers, expectedStatusCode, requestData);
+            updatedExcelDataList.add(updatedExcelData);
         }
+        Masking masking = new Masking();
+        String[] headers = new String[]{"Headers", "RequestBody", "Base_URL"};
+        String[] keysToMask = new String[] {"Content-Type", "email"};
+        updatedExcelDataList = masking.maskValuesOfMap(updatedExcelDataList, headers, keysToMask);
 
-        ExcelDataDriven.writeDataToExcel(testData, fileName + "_report_" + DateFormater.formatPresentDateTime(), sheetName + "_report_" + DateFormater.formatPresentDateTime());
+        ExcelDataDriven.writeDataToExcel(updatedExcelDataList, fileName + "_report_" + DateFormatter.formatPresentDateTime(), sheetName + "_report_" + DateFormatter.formatPresentDateTime());
     }
 
     /**
@@ -107,12 +109,12 @@ public class DataDrivenUtil {
      * @param headers            The headers as a Map<String, String>. Can be null if not applicable.
      * @param expectedStatusCode The expected HTTP status code as a String.
      * @param requestMap         The map containing the request data to be updated with response details.
+     * @return The updated request map with response details.
      */
-    private void executeAPIRequest(String method, String baseUrl, String basePath,
-                                   Object requestPayload, Map<String, String> pathParams,
-                                   Map<String, String> queryParams, Map<String, String> headers,
-                                   String expectedStatusCode, Map<String, String> requestMap) {
-        Map<String, String> updatedData = null;
+    private LinkedHashMap<String, String> executeAPIRequest(String method, String baseUrl, String basePath,
+                                                            Object requestPayload, Map<String, String> pathParams,
+                                                            Map<String, String> queryParams, Map<String, String> headers,
+                                                            String expectedStatusCode, LinkedHashMap<String, String> requestMap) {
 
         try {
             switch (method.toUpperCase()) {
@@ -175,22 +177,23 @@ public class DataDrivenUtil {
                     System.out.println("Unsupported HTTP method: " + method);
             }
 
-
+            requestMap = addBaseUrlToRequest(baseUrl, requestMap);
             // Update request map with response data
-            updateRequestMap(baseUrl, response, expectedStatusCode, requestMap);
+            requestMap = updateRequestMap(response, expectedStatusCode, requestMap);
 
         } catch (Exception e) {
             System.err.println("Error executing API request: " + e.getMessage());
             e.printStackTrace();
         }
+        return requestMap;
     }
 
-    private Map<String, String> addBaseUrlToRequest(String baseUrl, Map<String, String> request) {
+    private LinkedHashMap<String, String> addBaseUrlToRequest(String baseUrl, LinkedHashMap<String, String> requestMap) {
         // Create a new LinkedHashMap with "Base_URL" as the first entry
-        LinkedHashMap<String, String> updatedRequest = new LinkedHashMap<>();
-        updatedRequest.put("Base_URL", baseUrl);
-        updatedRequest.putAll(request);
-        return updatedRequest;
+        LinkedHashMap<String, String> updatedRequestMap = new LinkedHashMap<>();
+        updatedRequestMap.put("Base_URL", baseUrl);
+        updatedRequestMap.putAll(requestMap);
+        return updatedRequestMap;
     }
 
     /**
@@ -199,14 +202,21 @@ public class DataDrivenUtil {
      * @param response           The API response.
      * @param expectedStatusCode The expected status code.
      * @param requestMap         The map containing the request data to be updated.
-     * @return
+     * @return The updated request map with response details.
      */
-    private Map<String, String> updateRequestMap(String baseUrl, Response response, String expectedStatusCode, Map<String, String> requestMap) {
-
+    private LinkedHashMap<String, String> updateRequestMap(Response response, String expectedStatusCode, LinkedHashMap<String, String> requestMap) {
         String actualStatusCode = String.valueOf(response.getStatusCode());
         requestMap.put("PassOrFail", actualStatusCode.equals(expectedStatusCode) ? "PASS" : "FAIL");
-        requestMap.put("ResponseBody", response.getBody().asPrettyString());
+
+        String responseBody = response.getBody().asPrettyString();
+        if (!actualStatusCode.equals(expectedStatusCode)) {
+            requestMap.put("ResponseBody", responseBody);
+        } else {
+            requestMap.put("ResponseBody", "");
+        }
         requestMap.put("ResponseStatusCode", response.getStatusLine());
+
         return requestMap;
     }
+
 }

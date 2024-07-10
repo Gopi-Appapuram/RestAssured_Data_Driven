@@ -40,5 +40,4 @@ build/
 ### Mac OS ###
 .DS_Store
 
-/DataDrivenResults_*/
-/Reports/
+DataDrivenResults_*

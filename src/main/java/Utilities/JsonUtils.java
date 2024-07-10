@@ -2,7 +2,10 @@ package Utilities;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
@@ -186,4 +189,33 @@ public class JsonUtils {
             return value;
         }
     }
+
+    public static JsonObject convertToJsonObject(Object object) {
+        Gson gson = new Gson();
+        // Convert map to JSON string
+        String jsonString = gson.toJson(object);
+        // Parse JSON string to JsonObject
+        JsonObject jsonObject = gson.fromJson(jsonString, JsonObject.class);
+        return jsonObject;
+    }
+
+    // Convert a string to a JsonObject
+    public static JSONObject stringToJsonObject(String jsonString) {
+        return new JSONObject(jsonString);
+    }
+
+    // Convert a JsonObject to a string
+    public static String jsonObjectToString(JSONObject jsonObject) {
+        return jsonObject.toString();
+    }
+    /**
+     * Converts a JSONObject to a pretty formatted JSON string.
+     *
+     * @param jsonObject the JSONObject to convert
+     * @return the pretty formatted JSON string
+     */
+    public static String jsonObjectToPrettyString(JSONObject jsonObject) {
+        return jsonObject.toString(4); // 4 is the number of spaces for indentation
+    }
+
 }

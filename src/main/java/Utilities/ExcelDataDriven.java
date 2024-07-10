@@ -113,7 +113,7 @@ public class ExcelDataDriven {
      */
     public static void writeDataToExcel(List<LinkedHashMap<String, String>> data, String outputFilename, String sheetName) throws IOException, InvalidFormatException {
 
-        String uniqueDirPath = System.getProperty("user.dir") + "\\DataDrivenResults_" + DateFormater.formatPresentDateTime();
+        String uniqueDirPath = System.getProperty("user.dir") + "\\DataDrivenResults_" + DateFormatter.formatPresentDateTime();
         // Create the directory if it does not exist
         Files.createDirectories(Paths.get(uniqueDirPath));
 

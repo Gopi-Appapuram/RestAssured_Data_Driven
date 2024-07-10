@@ -1,21 +1,15 @@
 package Utilities;
 
 import net.datafaker.Faker;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
-import org.testng.annotations.Test;
 
-import javax.swing.*;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 /**
  * Utility class for formatting dates.
  */
-public class DateFormater {
+public class DateFormatter {
 
     /**
      * Generates a random future date and formats it as a string.

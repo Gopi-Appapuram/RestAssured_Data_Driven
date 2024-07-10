@@ -82,7 +82,7 @@ public class RandomDataGenerator {
      * @return Random future date as a string.
      */
     public static String getRandomFutureDate() {
-        return DateFormater.formatFutureDate();
+        return DateFormatter.formatFutureDate();
     }
 
     /**
@@ -91,7 +91,7 @@ public class RandomDataGenerator {
      * @return Random past date as a string.
      */
     public static String getRandomPastDate() {
-        return DateFormater.formatPastDate();
+        return DateFormatter.formatPastDate();
     }
 
     /**
@@ -100,7 +100,7 @@ public class RandomDataGenerator {
      * @return Current date as a string.
      */
     public static String getPresentDate() {
-        return DateFormater.formatPresentDate();
+        return DateFormatter.formatPresentDate();
     }
 
     /**
